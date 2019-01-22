@@ -8,6 +8,10 @@
 [alias]
 # CUSTOM GIT SHORTCUTS FOR TSCI 5050
 
+# This pulls in updates from the upstream course directory into your own branch
+# Example: 'git up'
+        up = !git fetch upstream && git merge upstream/master
+
 # This checks out a branch or commit, and should be followed by a value, for 
 # example 'git co master'
         co = checkout

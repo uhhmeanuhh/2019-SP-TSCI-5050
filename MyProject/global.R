@@ -46,7 +46,7 @@ instrequire(
     # data manipulation & piping. 
     # 'tools' is used by trailR.R
     # 'LaF' is used for fast and powerful reading of text files.
-    ,'readr','dplyr','magrittr','tools','LaF'
+    ,'readr','dplyr','magrittr','tools','LaF','xlsx'
     # dummies breaks categoric variables into individual dummy variables
     ,'dummies'
     #,'lubridate'

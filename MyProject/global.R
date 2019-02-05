@@ -10,12 +10,12 @@
 #' Keep this script minimalistic and *no number crunching here*
 #' 
 #+ echo=F
-# local_functionas --------------------------------------------------------------------
+# local_functionas -------------------------------------------------------------
 #' ## Load some local functions
 #+ warning=FALSE, message=FALSE
 source('./functions.R');
 # Now that we are managing trailR as a standalone package, need devtools
-if(!'devtools' %in% names(installed.packages()[,1])) instrequire('devtools');
+instrequire('devtools');
 devtools::install_github('bokov/trailR',ref='integration'); library(trailR);
 #+ echo=F
 # libs -------------------------------------------------------------------------

@@ -1,3 +1,3 @@
 instrequire('seqinr');
-fasta <- read.fasta(inputsequence)
+fasta <- read.fasta(inputsequence);
 c() 

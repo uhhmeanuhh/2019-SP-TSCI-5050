@@ -71,7 +71,7 @@ colnames(dat0) <- tolower(colnames(dat0));
 #' `data.R` script, you might as well get it out of the way in this section
 
 # read student post-run script if it exists ----
-if('post_dictionary.R' %in% list.files()) source('post_dictionary.R');
+#if('post_dictionary.R' %in% list.files()) source('post_dictionary.R',local= T, echo=T);
 
 #+ echo=F
 # save out ---------------------------------------------------------------------
@@ -81,3 +81,4 @@ if('post_dictionary.R' %in% list.files()) source('post_dictionary.R');
 tsave(file=paste0(.currentscript,'.rdata'),list=setdiff(ls(),.origfiles));
 #+ echo=F,eval=F
 c()
+

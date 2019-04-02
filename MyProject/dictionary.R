@@ -21,28 +21,6 @@ if('pre_dictionary.R' %in% list.files()) source('pre_dictionary.R');
 
 #+ echo=F
 # read dat0 ----
-#' If we don't know the field delimiter for sure, we will avoid making 
-#' assumptions and try to determine it empirically
-# if(!exists('file_delim')) {
-#   .temp <- try(read_tsv(inputdata,spec_tsv,n_max=1000));
-#   # If there was an error or there is only one column in the result, assume we 
-#   # guessed wrong and fail over to using CSV otherwise use TSV
-#   file_delim <- if(is(.temp,'try-error')||length(.temp$cols)==1) ',' else '\t'
-# }
-
-#' ## Initialize the column specification for parsing the input data
-# dat0spec <- spec_delim(inputdata,na=c('(null)','','.')
-#                        ,guess_max=5000
-#                        ,skip=n_skip
-#                        ,delim = file_delim);
-
-#' ## Optional: patient number
-#' 
-#' If you patient number variable (see `global.R`) is a number, force it to be
-#' treated as numeric rather than an integer to avoid missing values due to it 
-#' being too large
-if(pn %in% names(dat0spec$cols)) dat0spec$cols[[pn]] <- col_number();
-
 #' generic read function which auto-guesses file formats:
 dat0 <- do.call(tread,c(list(file=inputdata,readfun=autoread),file_args));
 #' The `colnames` command is unusual in that is 
@@ -52,6 +30,13 @@ colnames(dat0) <- tolower(colnames(dat0));
 #' Hint: if your data has no column names, here is
 #' how you can auto-generate them:
 # colnames(datX) <- make.names(seq_len(ncol(datX)))
+
+#' ## Optional: patient number
+#' 
+#' If you patient number variable (see `global.R`) is a number, force it to be
+#' treated as character rather than an integer to avoid missing values due to it 
+#' being too large
+if(pn %in% names(dat0)) dat0[[pn]] <- as.character(dat0[[pn]]);
 
 #+ echo=F
 # make data dictionary ----

@@ -343,6 +343,16 @@ autoread <- function(file,na=c('','.','(null)','NULL','NA'),...){
     out <- try(as_tibble(do.call(fread,c(list(input=file),txargs)))
                ,silent = T);
     if(!is(out,'try-error')) return(out);
+    txargs <- args[intersect(names(args),names(formals(read_delim)))];
+    txargs$na <- na;
+    txargs$delim <- '\t';
+    out <- try(as_tibble(do.call(readr::read_delim,c(list(file=file),txargs)))
+               ,silent=T);
+    if(!is(out,'try-error') && ncol(out)>1) return(out) else out_tab <- out;
+    txargs$delim <- ',';
+    out <- try(as_tibble(do.call(readr::read_delim,c(list(file=file),txargs)))
+               ,silent=T);
+    if(!is(out,'try-error')) return(out);
     cat('\nGuessed encoding:\n');print(enc);
     stop(attr(out,'condition')$message);
   }

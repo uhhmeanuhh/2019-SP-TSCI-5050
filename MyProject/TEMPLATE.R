@@ -6,17 +6,33 @@
 #' 
 #+ message=F,echo=F
 # init -----
-# %1$s %2$s %3$s %4$s %5$s %6$s
-.packages <- %4$s;
-.deps <- %6$s;
+
+# set to > 0 for verbose initialization
 debug <- 0;
+
+# vector of additional packages to install, if needed. If none needed, should be
+# an empty string
+.packages <- %4$s;
+
+# name of this script
+.currentscript <- "%5$s"; 
+
+# vector of other scripts which need to run before this one. If none needed, 
+# should be an empty string
+.deps <- %6$s; 
+
+# load stuff ----
+# load project-wide settings, including your personalized config.R
 if(debug>0) source('global.R') else {
   .junk<-capture.output(source('global.R',echo=F))};
+# load any additional packages needed by just this script
 if(length(.packages) > 1 || .packages != '') instrequire(.packages);
-.currentscript <- "%5$s";
+# start logging
 tself(scriptname=.currentscript);
-.origfiles <- ls();
-.loadedobjects <- c();
+# track what objects here come from other scripts
+.origfiles <- ls(); .loadedobjects <- c();
+# run scripts on which this one depends, if any that have not been
+# cached yet
 if(length(.deps)>1 || .deps != ''){
   for(ii in .deps){
     .depdata <- paste0(ii,'.rdata');
@@ -61,6 +77,7 @@ tsave(file=paste0(.currentscript,'.rdata'),list=setdiff(ls(),.origfiles)
 #' ### Audit Trail
 #+ echo=F
 .wt <- walktrail();
-pander(.wt[order(.wt$sequence),-5],split.tables=Inf,justify='left',missing='');
+pander(.wt[order(.wt$sequence),-5],split.tables=Inf,justify='left',missing=''
+       ,row.names=F);
 #+ echo=F,eval=F
 c()

@@ -23,18 +23,18 @@ if('pre_dictionary.R' %in% list.files()) source('pre_dictionary.R');
 # read dat0 ----
 #' If we don't know the field delimiter for sure, we will avoid making 
 #' assumptions and try to determine it empirically
-if(!exists('file_delim')) {
-  .temp <- try(read_tsv(inputdata,spec_tsv,n_max=1000));
-  #' If there was an error or there is only one column in the result, assume we 
-  #' guessed wrong and fail over to using CSV otherwise use TSV
-  file_delim <- if(is(.temp,'try-error')||length(.temp$cols)==1) ',' else '\t'
-}
+# if(!exists('file_delim')) {
+#   .temp <- try(read_tsv(inputdata,spec_tsv,n_max=1000));
+#   # If there was an error or there is only one column in the result, assume we 
+#   # guessed wrong and fail over to using CSV otherwise use TSV
+#   file_delim <- if(is(.temp,'try-error')||length(.temp$cols)==1) ',' else '\t'
+# }
 
 #' ## Initialize the column specification for parsing the input data
-dat0spec <- spec_delim(inputdata,na=c('(null)','','.')
-                       ,guess_max=5000
-                       ,skip=n_skip
-                       ,delim = file_delim);
+# dat0spec <- spec_delim(inputdata,na=c('(null)','','.')
+#                        ,guess_max=5000
+#                        ,skip=n_skip
+#                        ,delim = file_delim);
 
 #' ## Optional: patient number
 #' 

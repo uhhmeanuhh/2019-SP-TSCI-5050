@@ -6,7 +6,7 @@
 #' ---
 #' 
 #+ message=F,echo=F
-# init -------------------------------------------------------------------------
+# init ----
 debug <- 0;
 if(debug>0) source('global.R') else {
   .junk<-capture.output(source('global.R',echo=F))};
@@ -20,7 +20,7 @@ tself(scriptname=.currentscript);
 if('pre_dictionary.R' %in% list.files()) source('pre_dictionary.R');
 
 #+ echo=F
-# read dat0 --------------------------------------------------------------------
+# read dat0 ----
 #' If we don't know the field delimiter for sure, we will avoid making 
 #' assumptions and try to determine it empirically
 if(!exists('file_delim')) {
@@ -43,13 +43,8 @@ dat0spec <- spec_delim(inputdata,na=c('(null)','','.')
 #' being too large
 if(pn %in% names(dat0spec$cols)) dat0spec$cols[[pn]] <- col_number();
 
-#' ## Read the data 
-dat0.old <- read_delim(inputdata,delim=file_delim
-                   ,na=c('(null)','','.')
-                   ,skip=n_skip
-                   ,col_type=dat0spec);
-#' Test of generic read function which auto-guesses file formats:
-dat0 <- do.call(autoread,c(list(file=inputdata),file_args));
+#' generic read function which auto-guesses file formats:
+dat0 <- do.call(tread,c(list(file=inputdata,readfun=autoread),file_args));
 #' The `colnames` command is unusual in that is 
 #' can both output a result and be on the receiving
 #' end of a value assignment.
@@ -59,13 +54,13 @@ colnames(dat0) <- tolower(colnames(dat0));
 # colnames(datX) <- make.names(seq_len(ncol(datX)))
 
 #+ echo=F
-# make data dictionary ---------------------------------------------------------
+# make data dictionary ----
 #' ## Create the data dictionary (TBD)
 #dct0 <- rebuild_dct(dat0,dctfile_raw,dctfile_tpl,tread_fun = read_csv,na=''
 #                    ,searchrep=globalsearchrep);
 
 #+ echo=F
-# a few dat0 hacks -------------------------------------------------------------
+# a few dat0 hacks ----
 #' ## Raw Data Ops
 #' 
 #' Since you're messing around with the raw data anyway, if there is anything 
@@ -76,7 +71,7 @@ colnames(dat0) <- tolower(colnames(dat0));
 if('post_dictionary.R' %in% list.files()) source('post_dictionary.R');
 
 #+ echo=F
-# save out ---------------------------------------------------------------------
+# save out ----
 #' ## Save all the processed data to an rdata file 
 #' 
 #' ...which includes the audit trail

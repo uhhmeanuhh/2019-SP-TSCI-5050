@@ -510,6 +510,10 @@ personalizeTemplate <- function(file,template='TEMPLATE.R'
                                 ,deps=c('dictionary.R'),packages=c()
                                 ,title='TITLE',author='AUTHOR'
                                 ,date=Sys.Date()){
+  if(!all(deps %in% (.files <- list.files()))){
+    stop(
+      "Of the files you specified in the 'deps' argument the following are missing:\n"
+      ,paste0(setdiff(deps,.files),collapse=', '))};
   out <- sprintf(readLines(template)
                  ,title # The title that will appear in the header
                  ,author # Author, ditto

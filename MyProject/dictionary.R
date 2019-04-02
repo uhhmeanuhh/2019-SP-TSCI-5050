@@ -52,9 +52,6 @@ if(pn %in% names(dat0)) dat0[[pn]] <- as.character(dat0[[pn]]);
 #' you will need later which does not depend on the processing steps in the
 #' `data.R` script, you might as well get it out of the way in this section
 
-# read student post-run script if it exists ----
-if('post_dictionary.R' %in% list.files()) source('post_dictionary.R');
-
 #+ echo=F
 # save out ----
 #' ## Save all the processed data to an rdata file 

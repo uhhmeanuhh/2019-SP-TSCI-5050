@@ -359,6 +359,8 @@ t_autoread <- function(file,...){
 
 #' Autoguessing function for reading most common data formats
 autoread <- function(file,na=c('','.','(null)','NULL','NA')
+                     # change this to identity to do nothing to names
+                     ,fixnames=function(xx) setNames(xx,tolower(names(xx)))
                      ,file_args=list(),...){
   args <- list(...);
   # allow file_args to be overridden by ... args, while preserving
@@ -372,15 +374,21 @@ autoread <- function(file,na=c('','.','(null)','NULL','NA')
     txargs$na.strings <- na;
     out <- try(as_tibble(do.call(fread,c(list(input=file),txargs)))
                ,silent = T);
-    if(!is(out,'try-error')) return(out);
+    if(!is(out,'try-error')) return(fixnames(out));
     txargs <- args[intersect(names(args),names(formals(read_delim)))];
     txargs$na <- na;
     txargs$delim <- '\t';
-    out <- try(do.call(readr::read_delim,c(list(file=file),txargs)),silent=T);
-    if(!is(out,'try-error') && ncol(out)>1) return(out) else out_tab <- out;
+    suppressMessages(out <- try({
+      problems<-problems(oo<-do.call(readr::read_delim,c(list(file=file)
+                                                         ,txargs)));
+      oo},silent=T));
+    if(!is(out,'try-error') && ncol(out)>1) return(fixnames(out)) else out_tab <- out;
     txargs$delim <- ',';
-    out <- try(do.call(readr::read_delim,c(list(file=file),txargs)),silent=T);
-    if(!is(out,'try-error')) return(out);
+    suppressMessages(out <- try({
+      problems<-problems(oo<-do.call(readr::read_delim,c(list(file=file)
+                                                         ,txargs)));
+      oo},silent=T));
+    if(!is(out,'try-error')) return(fixnames(out));
     cat('\nGuessed encoding:\n');print(enc);
     stop(attr(out,'condition')$message);
   }
@@ -394,7 +402,7 @@ autoread <- function(file,na=c('','.','(null)','NULL','NA')
       "\nMultiple sheets found:\n",paste(sheets,collapse=', ')
       ,"\nReading in the first sheet. If you want a different one"
       ,"\nplease specify a 'sheet' argument")
-    return(do.call(read_xlsx,c(list(path=file),xlargs)));}
+    return(fixnames(do.call(read_xlsx,c(list(path=file),xlargs))));}
   # xls
   sheets <- try(.Call('readxl_xls_sheets',PACKAGE='readxl',file),silent=F);
   if(!is(sheets,'try-error')){
@@ -402,7 +410,7 @@ autoread <- function(file,na=c('','.','(null)','NULL','NA')
       "Multiple sheets found: ",paste(sheets,collapse=', ')
       ,"\nReading in the first sheet. If you want a different one"
       ,"\nplease specify a 'sheet' argument")
-    return(do.call(read_xls,c(list(path=file),xlargs)));}
+    return(fixnames(do.call(read_xls,c(list(path=file),xlargs))));}
   # need to unzip the file?
   out <- try(unzip(file,list=T));
   if(!is(out,'try-error')){
@@ -443,7 +451,16 @@ colinfo <- function(col,custom_stats=alist(),...){
   out;
   }
 
-tblinfo <- function(dat,info_cols=alist(),custom_stats=alist(),...){
+tblinfo <- function(dat,custom_stats=alist()
+                    # some handy column groupers
+                    ,info_cols=alist(
+                       c_empty=frc_missing==1,c_uninformative=n_nonmissing<2
+                      ,c_ordinal=uniquevals<10&isnum
+                      ,c_tm=uniquevals==1&n_missing>0
+                      ,c_tf=uniquevals==2,c_numeric=isnum&!c_ordinal
+                      ,c_factor=uniquevals<20&!isnum
+                      ,c_complex=!(c_ordinal|c_tm|c_tf|c_numeric|c_factor)
+                    ),...){
   out <- bind_rows(sapply(dat,colinfo,custom_stats=custom_stats,simplify=F)
                    ,.id='column');
   for(ii in names(info_cols)) out[[ii]] <- eval(info_cols[[ii]],envir=out);

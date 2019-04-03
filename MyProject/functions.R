@@ -145,6 +145,15 @@ getTryMsg <- function(xx,ifNotErr=xx){
   if(is(xx,'try-error')) return(attr(bla,'condition')$message);
   return(ifNotErr);}
 
+# to be used inside a function to get a list of unevaluated calls 
+# from all the ... args
+getParentDots <- function(xx,call=sys.call(-1),fun=sys.function(-1)){
+  out <- list();
+  for(ii in setdiff(names(call),c(names(formals(fun)),''))){
+    out[[ii]] <- call[[ii]]};
+  out;
+}
+
 # renaming and remapping  ----
 #' A function to re-order and/or rename the levels of a factor or 
 #' vector with optional cleanup.
@@ -411,11 +420,38 @@ autoread <- function(file,na=c('','.','(null)','NULL','NA')
   }
 
 #' Sumarize a table column
-colinfo <- function(col){
-  list(class=class(col)[1]
-       ,isnum=is.numeric(col)
-       ,nmissing=sum(is.na(col))
-       ,fracmissing=mean(is.na(col)))}
+colinfo <- function(col,custom_stats=alist(),...){
+  nn <- length(col);
+  nona <- na.omit(col);
+  isna <- is.na(col);
+  coltab <- table(nona);
+  out <- list(class=paste0(class(col),collapse=':')
+              ,uniquevals=length(coltab)
+              ,isnum=is.numeric(col)
+              ,frc_int=if(is.numeric(nona)) mean(nona%%1==0) else 0
+              ,n_nonmissing=nn-sum(isna)
+              ,n_missing=sum(isna)
+              ,frc_missing=mean(isna)
+              ,n_nonrepeat=sum(coltab==1)
+              ,frc_nonrepeat=sum(coltab==1)/length(nona)
+              ,frc_max=paste0(sort(coltab,decreasing = T)[1:3],collapse=':')
+  );
+  for(ii in names(custom_stats)){
+    out[[ii]] <- eval(custom_stats[[ii]],envir = out)};
+  dots <- getParentDots();
+  for(ii in names(dots)) out[[ii]] <- eval(dots[[ii]],envir=out);
+  out;
+  }
+
+tblinfo <- function(dat,info_cols=alist(),custom_stats=alist(),...){
+  out <- bind_rows(sapply(dat,colinfo,custom_stats=custom_stats,simplify=F)
+                   ,.id='column');
+  for(ii in names(info_cols)) out[[ii]] <- eval(info_cols[[ii]],envir=out);
+  dots <- getParentDots();
+  for(ii in names(dots)) out[[ii]] <- eval(dots[[ii]],envir=out);
+  class(out)<-c('dtdict');
+  return(out);
+}
 
 #' Returns a vector of column names that contain data elements of a particular type
 #' as specified by the user: "integer","POSIXct" "POSIXt", "numeric", "character", 

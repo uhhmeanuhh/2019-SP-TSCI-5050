@@ -22,7 +22,7 @@ if('pre_dictionary.R' %in% list.files()) source('pre_dictionary.R');
 #+ echo=F
 # read dat0 ----
 #' generic read function which auto-guesses file formats:
-dat0 <- do.call(tread,c(list(file=inputdata,readfun=autoread),file_args));
+dat0 <- t_autoread(inputdata,file_args=file_args);
 #' The `colnames` command is unusual in that is 
 #' can both output a result and be on the receiving
 #' end of a value assignment.

@@ -23,13 +23,6 @@ if('pre_dictionary.R' %in% list.files()) source('pre_dictionary.R');
 # read dat0 ----
 #' generic read function which auto-guesses file formats:
 dat0 <- t_autoread(inputdata,file_args=file_args);
-#' The `colnames` command is unusual in that is 
-#' can both output a result and be on the receiving
-#' end of a value assignment.
-colnames(dat0) <- tolower(colnames(dat0));
-#' Hint: if your data has no column names, here is
-#' how you can auto-generate them:
-# colnames(datX) <- make.names(seq_len(ncol(datX)))
 
 #' ## Optional: patient number
 #' 
@@ -40,9 +33,8 @@ if(pn %in% names(dat0)) dat0[[pn]] <- as.character(dat0[[pn]]);
 
 #+ echo=F
 # make data dictionary ----
-#' ## Create the data dictionary (TBD)
-#dct0 <- rebuild_dct(dat0,dctfile_raw,dctfile_tpl,tread_fun = read_csv,na=''
-#                    ,searchrep=globalsearchrep);
+#' ## Create the data dictionary
+dct0 <- tblinfo(dat0);
 
 #+ echo=F
 # a few dat0 hacks ----
@@ -57,6 +49,7 @@ if(pn %in% names(dat0)) dat0[[pn]] <- as.character(dat0[[pn]]);
 #' ## Save all the processed data to an rdata file 
 #' 
 #' ...which includes the audit trail
-tsave(file=paste0(.currentscript,'.rdata'),list=setdiff(ls(),.origfiles));
+suppressWarnings(tsave(file=paste0(.currentscript,'.rdata')
+                       ,list=setdiff(ls(),.origfiles)));
 #+ echo=F,eval=F
 c()

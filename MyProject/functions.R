@@ -140,8 +140,12 @@ mprintf <- function(fmt,...,flattenmethod=1){
   out;
   }
 
+# extract the error message of the argument
+getTryMsg <- function(xx,ifNotErr=xx){
+  if(is(xx,'try-error')) return(attr(bla,'condition')$message);
+  return(ifNotErr);}
 
-# renaming and remapping  ------------------------------------------------------
+# renaming and remapping  ----
 #' A function to re-order and/or rename the levels of a factor or 
 #' vector with optional cleanup.
 #'
@@ -332,9 +336,26 @@ truthy.default <- function(xx,truewords=c('TRUE','true','Yes','T','Y','yes','y')
 truthy.data.frame <- function(xx,...) as.data.frame(lapply(xx,truthy,...));
 
 # table utilities -----------------------------------
+t_autoread <- function(file,...){
+  # make sure prerequisite function exists
+  if(!exists('tread')) {
+    instrequire('devtools');
+    .result <- try({
+      devtools::install_github('bokov/trailR',ref='integration'); 
+      library(trailR);});
+    if(is(.result,'try-error')) return(getTryMsg(.result));
+  }
+  do.call(tread,c(list(file,readfun=autoread),list(...)));
+}
+
 #' Autoguessing function for reading most common data formats
-autoread <- function(file,na=c('','.','(null)','NULL','NA'),...){
+autoread <- function(file,na=c('','.','(null)','NULL','NA')
+                     ,file_args=list(),...){
   args <- list(...);
+  # allow file_args to be overridden by ... args, while preserving
+  # order of ... 
+  for(ii in intersect(names(args),names(file_args))) file_args[[ii]] <- NULL;
+  args <- c(file_args,args);
   # check for text formats
   if(nrow(enc<-guess_encoding(file))>0){
     # try to read as a delimited file via fread
@@ -346,12 +367,10 @@ autoread <- function(file,na=c('','.','(null)','NULL','NA'),...){
     txargs <- args[intersect(names(args),names(formals(read_delim)))];
     txargs$na <- na;
     txargs$delim <- '\t';
-    out <- try(as_tibble(do.call(readr::read_delim,c(list(file=file),txargs)))
-               ,silent=T);
+    out <- try(do.call(readr::read_delim,c(list(file=file),txargs)),silent=T);
     if(!is(out,'try-error') && ncol(out)>1) return(out) else out_tab <- out;
     txargs$delim <- ',';
-    out <- try(as_tibble(do.call(readr::read_delim,c(list(file=file),txargs)))
-               ,silent=T);
+    out <- try(do.call(readr::read_delim,c(list(file=file),txargs)),silent=T);
     if(!is(out,'try-error')) return(out);
     cat('\nGuessed encoding:\n');print(enc);
     stop(attr(out,'condition')$message);

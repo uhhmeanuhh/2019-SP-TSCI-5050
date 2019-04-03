@@ -52,7 +52,7 @@ if(length(.deps)>1 || .deps != ''){
 
 #+ echo=F
 # characterization ----
-pander(summary(dat0)); 
+pander(dct0); 
 
 #' ### Data Analysis
 #' 

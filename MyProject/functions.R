@@ -466,7 +466,7 @@ tblinfo <- function(dat,custom_stats=alist()
   for(ii in names(info_cols)) out[[ii]] <- eval(info_cols[[ii]],envir=out);
   dots <- getParentDots();
   for(ii in names(dots)) out[[ii]] <- eval(dots[[ii]],envir=out);
-  class(out)<-c('dtdict');
+  class(out)<-c('dtdict',class(out));
   return(out);
 }
 

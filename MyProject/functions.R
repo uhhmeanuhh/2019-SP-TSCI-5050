@@ -360,7 +360,8 @@ t_autoread <- function(file,...){
 #' Autoguessing function for reading most common data formats
 autoread <- function(file,na=c('','.','(null)','NULL','NA')
                      # change this to identity to do nothing to names
-                     ,fixnames=function(xx) setNames(xx,tolower(names(xx)))
+                     ,fixnames=function(xx) {
+                       setNames(xx,tolower(make.names(names(xx))))}
                      ,file_args=list(),...){
   args <- list(...);
   # allow file_args to be overridden by ... args, while preserving
@@ -578,10 +579,9 @@ fs <- function(str,text=str,url=paste0('#',gsub('[^_a-z0-9]','-',tolower(str)))
 }
 
 # Project Utilities ----
-personalizeTemplate <- function(file,template='TEMPLATE.R'
+personalizeTemplate <- function(file,title='TITLE',author='AUTHOR'
                                 ,deps=c('dictionary.R'),packages=c()
-                                ,title='TITLE',author='AUTHOR'
-                                ,date=Sys.Date()){
+                                ,date=Sys.Date(),template='TEMPLATE.R'){
   if(!all(deps %in% (.files <- list.files()))){
     stop(
       "Of the files you specified in the 'deps' argument the following are missing:\n"

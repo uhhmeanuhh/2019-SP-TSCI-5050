@@ -213,9 +213,11 @@ git_status <- function(print=T
   diffs <- lapply(diff_filters,git_diff_filter);
   if(print){
     message('Branch: ',branch);
-    if(length(commits)>0) message('Ahead of ',tracking,' by '
-                                  ,length(commits),' commit'
-                                  ,if(length(commits)>1) 's.' else '.');
+    if(length(commits)>0) {
+      message('Ahead of ',tracking,' by ',length(commits),' commit'
+              ,if(length(commits)>1) 's.' else '.')} else {
+                message('All local changes have been pushed')};
+    # TODO: check for un-pulled upstream changes
     for(ii in names(diffs)) if(length(diffs[[ii]])>0){
       message(ii,':'); cat(paste(' ',diffs[[ii]]),sep='\n');}
     }

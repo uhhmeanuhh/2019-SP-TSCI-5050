@@ -207,18 +207,20 @@ git_status <- function(print=T
   branch <- system('git rev-parse --abbrev-ref HEAD',intern=T);
   tracking <- system('git rev-parse --abbrev-ref --symbolic-full-name @{u}'
                      ,intern=T);
-  commits <- system(paste('git log'
-                          ,paste0(tracking,'..',branch),'--oneline'),intern=T);
+  commits <- if(length(tracking)==0) character(0) else {
+    system(paste('git log',paste0(tracking,'..',branch),'--oneline')
+           ,intern=T)};
   diffs <- lapply(diff_filters,git_diff_filter);
   if(print){
     message('Branch: ',branch);
-    if(length(commits)>0) message('Ahead of ',tracking,' by ',length(commits)
-                                  ,' commit'
+    if(length(commits)>0) message('Ahead of ',tracking,' by '
+                                  ,length(commits),' commit'
                                   ,if(length(commits)>1) 's.' else '.');
     for(ii in names(diffs)) if(length(diffs[[ii]])>0){
       message(ii,':'); cat(paste(' ',diffs[[ii]]),sep='\n');}
     }
-  invisible(list(branch=branch,tracking=tracking,commits=commits,diffs=diffs));
+  invisible(list(branch=branch,tracking=tracking,commits=commits
+                 ,diffs=diffs));
   }
 gst <- git_status;
 

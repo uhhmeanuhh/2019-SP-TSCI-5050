@@ -171,31 +171,23 @@ systemwrapper <- function(cmd='',...,VERBOSE=getOption('sysverbose',T)
   return(do.call(system,c(command=cmd,sysargs)));
 }
 # git ----
-
-git_checkout <- function(which=getOption('git.workingbranch','master')
-                                ,verbose=getOption('git.verbose',T),...){
-  cmd <- paste('git checkout',which,...);
-  if(verbose) message('Excecuting the following command:\n',cmd);
-  system(cmd)};
+git_checkout <- function(which=getOption('git.workingbranch','master'),...){
+  systemwrapper('git checkout',which,...)};
 gco <- git_checkout;
 
-git_commit <- function(file='-a',comment
-                       ,autopush=getOption('git.autopush',T)
-                       ,verbose=getOption('git.verbose',T),...){
-  git_status(verbose=F);
-  if(missing(comment)) {
-    comment <- readline('Please briefly describe the changes you have made:\n')};
-  cmd <- paste('git commit',paste(file,collapse=' '),'-m "',comment,'"',...);
-  if(verbose) message('Executing the following command:\n',cmd);
-  system(cmd);
+git_commit <- function(files='-a',comment
+                       ,autopush=getOption('git.autopush',T),...){
+  .changed<-git_status(VERBOSE=F,intern=T);
+  filenames <- if(!missing(files)){
+    paste0(paste(files,collapse=','),': ')} else 'multi: ';
+  comment <- paste0('"',filenames,comment,'"');
+  systemwrapper('git commit',files,'-m',comment,...);
   if(autopush) git_push();}
 gci <- git_commit;
 
-git_status <- function(opt='--porcelain'
-                       ,verbose=getOption('git.verbose',T),...){
-  cmd <- paste('git status',opt,...);
-  if(verbose) message('Executing the following command:\n',cmd);
-  system(cmd);}
+git_status <- function(porcelain=T,sb=T,...){
+  systemwrapper('git status',if(porcelain) '--porcelain' else ''
+                ,if(sb) '-sb' else '',...);}
 gst <- git_status;
 
 git_add <- function(file,verbose=getOption('git.verbose',T),...){

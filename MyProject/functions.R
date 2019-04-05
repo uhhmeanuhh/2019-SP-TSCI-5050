@@ -153,6 +153,23 @@ getParentDots <- function(xx,call=sys.call(-1),fun=sys.function(-1)){
     out[[ii]] <- call[[ii]]};
   out;
 }
+
+systemwrapper <- function(cmd='',...,VERBOSE=getOption('sysverbose',T)
+                          ,CHECKFILES=c('files')){
+  args <- list(...); sysargs <- list();
+  # separate out the args intended for system
+  for(ii in intersect(names(args),names(formals(system)))){
+    sysargs[[ii]] <- args[[ii]]; args[[ii]] <- NULL;};
+  # check to make sure all arguments listed in checkfiles contain only files
+  # that exist
+  for(ii in intersect(CHECKFILES,names(args))){
+    if(!all(.exist <- file.exists(args[[ii]]))){
+      stop('The following files cannot be found:\n'
+           ,paste(args[[ii]][!.exist],collapse=', '))}};
+  for(xx in args) cmd <- paste(cmd,paste(xx,collapse=' '));
+  if(VERBOSE) message('Executing the following command:\n',cmd);
+  return(do.call(system,c(command=cmd,sysargs)));
+}
 # git ----
 
 git_checkout <- function(which=getOption('git.workingbranch','master')
@@ -216,6 +233,14 @@ gmr <- git_merge;
 
 # TODO: git fetch upstream && git merge upstream/master
 # But with -X theirs vs ours options, and conflict pre-detection
+
+# TODO: git_ignore
+
+# TODO: git_inituser (for name and email)
+
+# TODO: git_setupstream
+
+# TODO: git nagger
 
 # renaming and remapping  ----
 #' A function to re-order and/or rename the levels of a factor or 

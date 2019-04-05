@@ -153,7 +153,40 @@ getParentDots <- function(xx,call=sys.call(-1),fun=sys.function(-1)){
     out[[ii]] <- call[[ii]]};
   out;
 }
+# git ----
 
+git_checkout <- function(branch=getOption('git.workingbranch','master')
+                                ,verbose=getOption('git.verbose',T),...){
+  cmd <- paste('git checkout',branch,...);
+  if(verbose) message('Excecuting the following command:\n',cmd);
+  system(cmd)};
+gco <- git_checkout;
+
+git_commit <- function(file='-a',comment
+                       ,verbose=getOption('git.verbose',T),...){
+  if(verbose) git_status();
+  if(missing(comment)) {
+    comment <- readline('Please briefly describe the changes you have made:\n')};
+  cmd <- paste('git commit',paste(file,collapse=' '),'-m "',comment,'"',...);
+  if(verbose) message('Executing the following command:\n',cmd);
+  system(cmd);
+}
+gci <- git_commit;
+
+git_status <- function(opt='--porcelain'
+                       ,verbose=getOption('git.verbose',T),...){
+  cmd <- paste('git status',opt,...);
+  if(verbose) message('Executing the following command:\n',cmd);
+  system(cmd);
+}
+
+gst <- git_status;
+
+git_add <- function(file,verbose=getOption('git.verbose',T),...){
+  cmd <- paste('git add',paste(collapse=' '),...);
+  if(verbose) message('Executing the following command:\n',cmd);
+  system(cmd);
+}
 # renaming and remapping  ----
 #' A function to re-order and/or rename the levels of a factor or 
 #' vector with optional cleanup.

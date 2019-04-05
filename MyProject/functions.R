@@ -186,51 +186,96 @@ git_commit <- function(files='-a',comment
 gci <- git_commit;
 
 git_status <- function(porcelain=T,sb=T,...){
-  systemwrapper('git status',if(porcelain) '--porcelain' else ''
-                ,if(sb) '-sb' else '',...);}
+  out<-systemwrapper('git status',if(porcelain) '--porcelain' else ''
+                ,if(sb) '-sb' else '',...);
+  # TODO: find how far ahead of origin current branch is
+  # sub(".*[ahead[[:blank:]]+([[:digit:]]+)]",'\\1',out[1])
+  }
 gst <- git_status;
 
-git_add <- function(file,verbose=getOption('git.verbose',T),...){
-  cmd <- paste('git add',paste(collapse=' '),...);
-  if(verbose) message('Executing the following command:\n',cmd);
-  system(cmd);}
+git_add <- function(files,...){
+  systemwrapper('git add',files=files,...)};
 gadd <- git_add;
 
-git_push <- function(verbose=getOption('git.verbose',T),...){
-  cmd <- paste('git push',paste(...));
-  if(verbose) message('Executing the following command:\n',cmd);
-  system(cmd);}
+git_push <- function(...) systemwrapper('git push',...);
 gp <- git_push;
 
-git_newbranch <- function(branch,pushorigin=F
-                          ,verbose=getOption('git.verbose',T),...){
-  cmd <- paste('git checkout -b',branch,...);
-  if(verbose) message('Executing the following command:\n',cmd);
-  system(cmd);
-  if(pushorigin){
-    cmd <- paste('git push origin',branch);
-    if(verbose) message('Executing the following command:\n',cmd);
-    system(cmd);
-  }
+git_newbranch <- function(branch,pushorigin=F,...){
+  systemwrapper('git checkout -b',branch,...);
+  if(pushorigin) systemwrapper('git push origin',branch);
 }
 gbr <- git_newbranch;
 
 # TODO: detect conflicts in advance and ask what to do
-git_merge <- function(which,fastforward=getOption('git.fastfwd',F)
+git_merge <- function(which,fastfwd=getOption('git.fastfwd',F)
                       ,verbose=getOption('git.verbose',T),...){
-  cmd <- paste('git merge',if(!fastforward) '--no-ff' else '',...);
+  cmd <- paste('git merge',if(!fastfwd) '--no-ff' else '',...);
   if(verbose) message('Executing the following command:\n',cmd);
   system(cmd);}
 gmr <- git_merge;
 
-# TODO: git fetch upstream && git merge upstream/master
-# But with -X theirs vs ours options, and conflict pre-detection
+git_autoconf <- function(upstream=getOption('git.upstream'),...){
+  # should only be run in an interactive context
+  if(!'upstream' %in% system('git remote',intern=T) && !is.null(upstream)){
+    systemwrapper('git remote add upstream',upstream);
+  }
+  # Set username and email
+  if(length(.username <- system('git config user.name',intern=T))==0){
+    message("Please type in your name as you want it to appear in git logs:");
+    .username <- paste0('"',readline(),'"');
+    systemwrapper('git config --global user.name',.username)};
+  if(length(.useremail <- system('git config user.email',intern=T))==0){
+    message("Please type in your email as you want it to appear in git logs:");
+    .useremail <- paste0('"',readline(),'"');
+    systemwrapper('git config --global user.email',.useremail)};
+}
 
-# TODO: git_ignore
+# By default incorporates upstream changes if they don't conflict with local 
+# changes but overwrites 
+# set mergestrategy to 'ours' to resolve conflicts in favor of local changes
+# Or set it to '' to do whatever the default action is.
+# The ... args get passed to the merge command
+git_getupstream <- function(mergestrategy='theirs'
+                            ,message='Merge with upstream'
+                            ,fastfwd=getOption('git.fastfwd',F)
+                            ,upstrmbranch=getOption('git.upstrmbranch','master')
+                            ,localbranch=getOption('git.workingbranch','master')
+                            ,...){
+  git_autoconf(...);
+  systemwrapper('git fetch upstream');
+  git_checkout(which = localbranch);
+  upstreamaddress <- paste0('upstream/',upstrmbranch);
+  systemwrapper('git merge',upstreamaddress
+                ,if(!fastfwd) '--no-ff' else ''
+                ,if(mergestrategy!='') paste0('-X',mergestrategy) else ''
+                ,'-m',paste0('"',message,'"'),...);
+  result <- system('git diff --name-only --diff-filter=U',intern=T);
+  if(length(result)>0){
+    warning('Uh oh. There seem to be merge conflicts in the following files:\n'
+            ,paste(result,collapse=', '),'\nAborting merge.\n');
+    systemwrapper('git merge --abort')
+    stop('The merge you attempted to do will need to be sorted out manually outside of R. If you are doing this as part of a class, please ask your instructor for help.')};
+}
+gup <- gitup <- git_getupstream;
 
-# TODO: git_inituser (for name and email)
 
-# TODO: git_setupstream
+#' Title: Add a pattern to a .gitignore file
+#'
+#' @param patterns A character vector of patterns to ignore. Required.
+#'                 Always appended. If you need to un-ignore something
+#'                 you will have to edit .gitignore manually.
+#' @param ignorepath Path to .gitignore (you can have multiple ones)
+#'                   current directory by default.
+#' @param preamble What to put in the line/s before a set of ignore 
+#'                 patterns. Empty line by default, set to NULL if you
+#'                 want to not skip a line.
+#'
+#' @return NULL
+#' @export
+#'
+#' @examples git_ignore(c('*.csv','*.tsv'))
+git_ignore <- function(patterns,ignorepath='.',preamble='') {
+  write(c(preamble,patterns),file.path(ignorepath,'.gitignore'),append=T)};
 
 # TODO: git nagger
 

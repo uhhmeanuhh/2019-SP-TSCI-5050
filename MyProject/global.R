@@ -13,6 +13,7 @@
 # local_functionas -------------------------------------------------------------
 #' ## Load some local functions
 #+ warning=FALSE, message=FALSE
+options('git.upstream','git@github.com:bokov/2019-SP-TSCI-5050')
 source('./functions.R');
 # Now that we are managing trailR as a standalone package, need devtools
 instrequire('devtools');

@@ -163,30 +163,36 @@ git_checkout <- function(branch=getOption('git.workingbranch','master')
 gco <- git_checkout;
 
 git_commit <- function(file='-a',comment
+                       ,autopush=getOption('git.autopush',T)
                        ,verbose=getOption('git.verbose',T),...){
-  if(verbose) git_status(verbose=F);
+  git_status(verbose=F);
   if(missing(comment)) {
     comment <- readline('Please briefly describe the changes you have made:\n')};
   cmd <- paste('git commit',paste(file,collapse=' '),'-m "',comment,'"',...);
   if(verbose) message('Executing the following command:\n',cmd);
   system(cmd);
-}
+  if(autopush) git_push();}
 gci <- git_commit;
 
 git_status <- function(opt='--porcelain'
                        ,verbose=getOption('git.verbose',T),...){
   cmd <- paste('git status',opt,...);
   if(verbose) message('Executing the following command:\n',cmd);
-  system(cmd);
-}
-
+  system(cmd);}
 gst <- git_status;
 
 git_add <- function(file,verbose=getOption('git.verbose',T),...){
   cmd <- paste('git add',paste(collapse=' '),...);
   if(verbose) message('Executing the following command:\n',cmd);
-  system(cmd);
-}
+  system(cmd);}
+gadd <- git_add;
+
+git_push <- function(verbose=getOption('git.verbose',T),...){
+  cmd <- paste('git push',paste(...));
+  if(verbose) message('Executing the following command:\n',cmd);
+  system(cmd);}
+gp <- git_push;
+
 # renaming and remapping  ----
 #' A function to re-order and/or rename the levels of a factor or 
 #' vector with optional cleanup.

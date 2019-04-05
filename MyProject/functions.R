@@ -155,9 +155,9 @@ getParentDots <- function(xx,call=sys.call(-1),fun=sys.function(-1)){
 }
 # git ----
 
-git_checkout <- function(branch=getOption('git.workingbranch','master')
+git_checkout <- function(which=getOption('git.workingbranch','master')
                                 ,verbose=getOption('git.verbose',T),...){
-  cmd <- paste('git checkout',branch,...);
+  cmd <- paste('git checkout',which,...);
   if(verbose) message('Excecuting the following command:\n',cmd);
   system(cmd)};
 gco <- git_checkout;
@@ -192,6 +192,30 @@ git_push <- function(verbose=getOption('git.verbose',T),...){
   if(verbose) message('Executing the following command:\n',cmd);
   system(cmd);}
 gp <- git_push;
+
+git_newbranch <- function(branch,pushorigin=F
+                          ,verbose=getOption('git.verbose',T),...){
+  cmd <- paste('git checkout -b',branch,...);
+  if(verbose) message('Executing the following command:\n',cmd);
+  system(cmd);
+  if(pushorigin){
+    cmd <- paste('git push origin',branch);
+    if(verbose) message('Executing the following command:\n',cmd);
+    system(cmd);
+  }
+}
+gbr <- git_newbranch;
+
+# TODO: detect conflicts in advance and ask what to do
+git_merge <- function(which,fastforward=getOption('git.fastfwd',F)
+                      ,verbose=getOption('git.verbose',T),...){
+  cmd <- paste('git merge',if(!fastforward) '--no-ff' else '',...);
+  if(verbose) message('Executing the following command:\n',cmd);
+  system(cmd);}
+gmr <- git_merge;
+
+# TODO: git fetch upstream && git merge upstream/master
+# But with -X theirs vs ours options, and conflict pre-detection
 
 # renaming and remapping  ----
 #' A function to re-order and/or rename the levels of a factor or 

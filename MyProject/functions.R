@@ -118,6 +118,15 @@ fullargs <- function(syspar=sys.parent(),env=parent.frame(2L),expand.dots=TRUE){
 
 #' Take a set of objects coercible to matrices and perform sprintf on them while
 #' preserving their dimensions (obtained from the first argument of ...)
+
+# figure out how the current OS represents the top of its file system
+systemRootDir <- function(){
+  dir <- dirname(normalizePath('.'));
+  newdir <- dirname(dir);
+  while(dir!=newdir){dir<-newdir; newdir <- dirname(newdir)}
+  return(newdir);
+}
+
 mprintf <- function(fmt,...,flattenmethod=1){
   dots <- list(...);
   out<-dots[[1]];
@@ -185,17 +194,46 @@ git_commit <- function(files='-a',comment
   if(autopush) git_push();}
 gci <- git_commit;
 
-git_status <- function(porcelain=T,sb=T,...){
-  out<-systemwrapper('git status',if(porcelain) '--porcelain' else ''
-                ,if(sb) '-sb' else '',...);
-  # TODO: find how far ahead of origin current branch is
-  # sub(".*[ahead[[:blank:]]+([[:digit:]]+)]",'\\1',out[1])
+# List the files in the repo having a particular status
+git_diff_filter <- function(xx) {
+  system(paste('git diff --name-only --diff-filter',xx),intern=T)};
+
+git_status <- function(print=T
+                       ,diff_filters=list(Added='A',Copied='C',Deleted='D'
+                                          ,Modified='M',Renamed='R'
+                                          ,ChangedType='T',Unmerged='U'
+                                          ,Unknown='X',Broken='B')
+                       ,...){
+  branch <- system('git rev-parse --abbrev-ref HEAD',intern=T);
+  tracking <- system('git rev-parse --abbrev-ref --symbolic-full-name @{u}'
+                     ,intern=T);
+  commits <- system(paste('git log'
+                          ,paste0(tracking,'..',branch),'--oneline'),intern=T);
+  diffs <- lapply(diff_filters,git_diff_filter);
+  if(print){
+    message('Branch: ',branch);
+    if(length(commits)>0) message('Ahead of ',tracking,' by ',length(commits)
+                                  ,' commit'
+                                  ,if(length(commits)>1) 's.' else '.');
+    for(ii in names(diffs)) if(length(diffs[[ii]])>0){
+      message(ii,':'); cat(paste(' ',diffs[[ii]]),sep='\n');}
+    }
+  invisible(list(branch=branch,tracking=tracking,commits=commits,diffs=diffs));
   }
 gst <- git_status;
+
+git_lsfiles <- function(...) {systemwrapper('git ls-files',...)};
+
+git_other <- function(...){systemwrapper('git',...)};
+git_ <- git_other;
 
 git_add <- function(files,...){
   systemwrapper('git add',files=files,...)};
 gadd <- git_add;
+
+git_rename <- function(from,to,...){systemwrapper('git rename',from,to,...)};
+
+git_move <- function(from,to,...) {systemwrapper('git mv',from,to,...)};
 
 git_push <- function(...) systemwrapper('git push',...);
 gp <- git_push;
@@ -241,7 +279,7 @@ git_getupstream <- function(mergestrategy='theirs'
                             ,upstrmbranch=getOption('git.upstrmbranch','master')
                             ,localbranch=getOption('git.workingbranch','master')
                             ,...){
-  git_autoconf(...);
+  git_autoconf();
   systemwrapper('git fetch upstream');
   git_checkout(which = localbranch);
   upstreamaddress <- paste0('upstream/',upstrmbranch);

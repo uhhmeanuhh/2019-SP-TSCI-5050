@@ -164,7 +164,7 @@ gco <- git_checkout;
 
 git_commit <- function(file='-a',comment
                        ,verbose=getOption('git.verbose',T),...){
-  if(verbose) git_status();
+  if(verbose) git_status(verbose=F);
   if(missing(comment)) {
     comment <- readline('Please briefly describe the changes you have made:\n')};
   cmd <- paste('git commit',paste(file,collapse=' '),'-m "',comment,'"',...);

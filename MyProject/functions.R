@@ -216,7 +216,8 @@ git_status <- function(print=T
     if(length(commits)>0) {
       message('Ahead of ',tracking,' by ',length(commits),' commit'
               ,if(length(commits)>1) 's.' else '.')} else {
-                message('All local changes have already been pushed')};
+                if(!any(sapply(diffs,length)>0)){
+                  message('All local changes have already been pushed')}};
     # TODO: check for un-pulled upstream changes
     for(ii in names(diffs)) if(length(diffs[[ii]])>0){
       message(ii,':'); cat(paste(' ',diffs[[ii]]),sep='\n');}

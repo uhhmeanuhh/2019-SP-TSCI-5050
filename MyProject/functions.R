@@ -240,7 +240,7 @@ git_rename <- function(from,to,...){systemwrapper('git rename',from,to,...)};
 
 git_move <- function(from,to,...) {systemwrapper('git mv',from,to,...)};
 
-git_push <- function(...) systemwrapper('git push',...);
+git_push <- function(...) {systemwrapper('git push',...)};
 gp <- git_push;
 
 git_newbranch <- function(branch,pushorigin=F,...){

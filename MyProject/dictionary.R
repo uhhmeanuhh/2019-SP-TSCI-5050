@@ -76,9 +76,7 @@ colnames(dat0) <- tolower(colnames(dat0));
 #if('post_dictionary.R' %in% list.files()) source('post_dictionary.R',local= T, echo=T);
 
 #+ echo=F
-# save out ---------------------------------------------------------------------
-#' ## Save all the processed data to an rdata file 
-#' 
+# save out ----
 #' ...which includes the audit trail
 tsave(file=paste0(.currentscript,'.rdata'),list=setdiff(ls(),.origfiles));
 #+ echo=F,eval=F

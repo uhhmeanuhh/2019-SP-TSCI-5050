@@ -57,7 +57,7 @@ set.alignment(row.names='right')
 .oldopt00 <- panderOptions('table.continues');
 panderOptions('table.continues','Data Dictionary (continued)');
 #  render the Data Dictionary table
-pander(dct0[,-1],row.names=dct0$column); 
+pander(dct0[,-1],row.names=dct0$column,split.tables=Inf); 
 #  reset this option to its previous value
 panderOptions('table.continues',.oldopt00);
 
@@ -77,6 +77,7 @@ panderOptions('table.continues',.oldopt00);
 #' ### Scatterplot matrix (step 10)
 #' 
 #' To explore pairwise relationships between all variables of interest.
+#+ ggpairs_plot
 # Uncomment the below after mainvars already exists and you have chosen a 
 # discrete variable to take the place of VAR1 (note that you don't quote that
 # one)

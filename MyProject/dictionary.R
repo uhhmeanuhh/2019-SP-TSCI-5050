@@ -44,18 +44,15 @@ dct0 <- tblinfo(dat0);
 #' you will need later which does not depend on the processing steps in the
 #' `data.R` script, you might as well get it out of the way in this section
 
-<<<<<<< HEAD
 # read student post-run script if it exists ----
 #if('post_dictionary.R' %in% list.files()) source('post_dictionary.R',local= T, echo=T);
 
 #+ echo=F
 # save out ----
-=======
 #+ echo=F
 # save out ----
 #' ## Save all the processed data to an rdata file 
 #' 
->>>>>>> b97ef813b7fcd4adbcd0e83a9a2f65495ff1ffd0
 #' ...which includes the audit trail
 suppressWarnings(tsave(file=paste0(.currentscript,'.rdata')
                        ,list=setdiff(ls(),.origfiles)));
